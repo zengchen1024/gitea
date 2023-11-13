@@ -43,6 +43,7 @@ type MinioStorageConfig struct {
 	Bucket             string `ini:"MINIO_BUCKET" json:",omitempty"`
 	Location           string `ini:"MINIO_LOCATION" json:",omitempty"`
 	BasePath           string `ini:"MINIO_BASE_PATH" json:",omitempty"`
+	BucketDomain       string `ini:"MINIO_BUCKET_DOMAIN" json:",omitempty"`
 	UseSSL             bool   `ini:"MINIO_USE_SSL"`
 	InsecureSkipVerify bool   `ini:"MINIO_INSECURE_SKIP_VERIFY"`
 	ChecksumAlgorithm  string `ini:"MINIO_CHECKSUM_ALGORITHM" json:",omitempty"`
