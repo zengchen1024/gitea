@@ -16,7 +16,6 @@ import (
 	"code.gitea.io/gitea/models"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
-	modulectx "code.gitea.io/gitea/modules/context"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/log"
 	repo_module "code.gitea.io/gitea/modules/repository"
@@ -24,6 +23,10 @@ import (
 	asymkey_service "code.gitea.io/gitea/services/asymkey"
 	"code.gitea.io/gitea/services/gitdiff"
 )
+
+type contextLocal interface {
+	RemoteAddr() string
+}
 
 // TemporaryUploadRepository is a type to wrap our upload repositories as a shallow clone
 type TemporaryUploadRepository struct {
@@ -300,14 +303,8 @@ func (t *TemporaryUploadRepository) Push(doer *user_model.User, commitHash, bran
 	// Because calls hooks we need to pass in the environment
 	env := repo_module.PushingEnvironment(doer, t.repo)
 
-	if v, ok := t.ctx.(*modulectx.Context); ok {
-		env = append(env, "ME="+v.RemoteAddr())
-
-	} else if v1, ok := t.ctx.(*modulectx.APIContext); ok {
-		env = append(env, "ME="+v1.RemoteAddr())
-
-	} else {
-		env = append(env, "ME="+fmt.Sprintf("%T", t.ctx))
+	if v, ok := t.ctx.(contextLocal); ok {
+		env = append(env, repo_module.EnvRemoteAddr+"="+v.RemoteAddr())
 	}
 
 	if err := git.Push(t.ctx, t.basePath, git.PushOptions{
