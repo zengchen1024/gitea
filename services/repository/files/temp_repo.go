@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/models"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
+	modulectx "code.gitea.io/gitea/modules/context"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/log"
 	repo_module "code.gitea.io/gitea/modules/repository"
@@ -298,6 +299,17 @@ func (t *TemporaryUploadRepository) CommitTreeWithDate(parent string, author, co
 func (t *TemporaryUploadRepository) Push(doer *user_model.User, commitHash, branch string) error {
 	// Because calls hooks we need to pass in the environment
 	env := repo_module.PushingEnvironment(doer, t.repo)
+
+	if v, ok := t.ctx.(*modulectx.Context); ok {
+		env = append(env, "ME="+v.RemoteAddr())
+
+	} else if v1, ok := t.ctx.(*modulectx.APIContext); ok {
+		env = append(env, "ME="+v1.RemoteAddr())
+
+	} else {
+		env = append(env, "ME="+fmt.Sprintf("%T", t.ctx))
+	}
+
 	if err := git.Push(t.ctx, t.basePath, git.PushOptions{
 		Remote: t.repo.RepoPath(),
 		Branch: strings.TrimSpace(commitHash) + ":" + git.BranchPrefix + strings.TrimSpace(branch),

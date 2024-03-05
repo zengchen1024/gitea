@@ -180,6 +180,7 @@ func httpBase(ctx *context.Context) *serviceHandler {
 			repo_module.EnvPusherName + "=" + ctx.Doer.Name,
 			repo_module.EnvPusherID + fmt.Sprintf("=%d", ctx.Doer.ID),
 			repo_module.EnvAppURL + "=" + setting.AppURL,
+			"ME" + "=" + ctx.RemoteAddr(),
 		}
 
 		if repoExist {

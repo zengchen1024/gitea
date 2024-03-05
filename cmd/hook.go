@@ -474,6 +474,9 @@ func pushOptions() map[string]string {
 			}
 		}
 	}
+
+	opts["ME"] = os.Getenv("ME")
+
 	return opts
 }
 
